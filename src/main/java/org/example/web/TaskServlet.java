@@ -25,6 +25,7 @@ public class TaskServlet extends HttpServlet {
     //endpoint
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addCorsHeaders(resp);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
@@ -40,6 +41,7 @@ public class TaskServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addCorsHeaders(resp);
         String id = req.getParameter("id");
         UpdateTaskRequest request = ObjectMapperConfiguration.OBJECT_MAPPER.readValue(req.getReader(), UpdateTaskRequest.class);
         try {
@@ -51,6 +53,7 @@ public class TaskServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addCorsHeaders(resp);
        String id = req.getParameter("id");
         try {
             taskService.deleteTask(Long.parseLong(id));
@@ -61,6 +64,7 @@ public class TaskServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addCorsHeaders(resp);
         try {
             List<Task> tasks = taskService.getTask();
 
@@ -69,5 +73,17 @@ public class TaskServlet extends HttpServlet {
         } catch (SQLException | ClassNotFoundException e) {
             resp.sendError(500, "There was an error while processing your request." + e.getMessage()); //500 = internal server error
         }
+    }
+
+    //preflight requests - verificare facuta de browsere
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addCorsHeaders(resp);
+    }
+
+    private void addCorsHeaders(HttpServletResponse resp){
+        resp.addHeader("Access-Control-Allow-Origin", "*");
+        resp.addHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
+        resp.addHeader("Access-Control-Allow-Headers", "content-type");
     }
 }
